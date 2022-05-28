@@ -8,7 +8,8 @@ namespace HotelManagementSystemForPeakInterview.IServices
 {
     internal interface IRoomService
     {
-        string CreateRooms(int floorTotal, int roomPerFloor);
+        bool CreateRooms(int floorTotal, int roomPerFloor);
         List<string> GetAvaliableRooms();
+        bool IsRoomExist(string roomId);
     }
 }
