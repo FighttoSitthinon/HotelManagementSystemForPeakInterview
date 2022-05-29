@@ -10,9 +10,9 @@ namespace HotelManagementSystemForPeakInterview.IServices
     internal interface IBookingService
     {
         int CheckIn(CheckInDto model);
-        List<CheckInResultDto> CheckInByFloor(CheckInDto model, int floor);
+        List<int> CheckInByRoomIdList(CheckInDto model, List<string> rooms);
         string CheckOut(CheckOutDto model);
-        List<string> CheckOutByFloor(int floor);
+        bool CheckOutByRoomIdList(List<string> rooms);
         string GetGuestByRoom(string room);
         string GetGuestByKeyCard(int KeyCardNo);
         List<string> GetAllGuests();

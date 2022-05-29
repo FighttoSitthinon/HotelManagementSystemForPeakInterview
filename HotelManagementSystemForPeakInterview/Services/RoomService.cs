@@ -45,9 +45,19 @@ namespace HotelManagementSystemForPeakInterview.Services
             return Rooms.Where(r => r.Status == (int)BookingStatus.CheckOut).Select(r => r.RoomNumber).ToList();
         }
 
-        public List<string> GetRoomsByFloor(int floor)
+        public List<string> GetRoomsByFloor(int floor, BookingStatus? status = null)
         {
-            return Rooms.Where(r => r.Floor == floor).Select(r => r.RoomNumber).ToList();
+            var _Rooms = Rooms.Where(r => r.Floor == floor);
+            if (status.HasValue)
+            {
+                _Rooms = _Rooms.Where(r => r.Status == (int)status);
+            }
+            return _Rooms.Select(r => r.RoomNumber).ToList();
+        }
+
+        public bool IsFloorAvaliable(int floor)
+        {
+            return !Rooms.Where(r => r.Floor == floor).Any(x => x.Status == (int)BookingStatus.CheckIn);
         }
 
         public bool IsRoomAvaliable(string room)

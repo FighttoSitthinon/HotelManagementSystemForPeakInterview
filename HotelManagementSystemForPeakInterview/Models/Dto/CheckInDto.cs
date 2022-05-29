@@ -25,13 +25,4 @@ namespace HotelManagementSystemForPeakInterview.Models.Dto
         public int Age { get; set; }
        
     }
-
-    public class CheckInResultDto : CheckInDto
-    {
-        public CheckInResultDto()
-        {
-
-        }
-        public int KeyCardNo { get; set; }
-    }
 }

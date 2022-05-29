@@ -166,36 +166,94 @@ namespace HotelManagementSystemForPeakInterview
 
         private string BookingByFloor(string[] words)
         {
-            return "";
+            try
+            {
+                int floor = int.Parse(words[1]);
+                CheckInDto model = new CheckInDto()
+                {
+                    Room = null,
+                    Name = words[2],
+                    Age = int.Parse(words[3]),
+                };
+
+                if (!roomService.IsFloorAvaliable(floor))
+                {
+                    return $"Cannot book floor {floor} for {model.Name}.";
+                }
+
+                var roomIdList = roomService.GetRoomsByFloor(floor);
+                if (roomIdList == null || roomIdList.Count == 0) return "Floor or room doesn't exist.";
+
+                var keyCards = bookingService.CheckInByRoomIdList(model, roomIdList);
+
+                foreach (var room in roomIdList)
+                {
+                    var updateResult = roomService.UpdateStatusRoom(room, BookingStatus.CheckIn);
+                    if (!updateResult) return "Something wrong";
+                }
+
+                return $"Room {string.Join(", ", roomIdList)} are booked with keycard number {string.Join(", ", keyCards)}";
+            }
+            catch (Exception)
+            {
+                return "Something wrong";
+            }
         }
 
         private string Checkout(string[] words)
         {
-            CheckOutDto model = new CheckOutDto()
+            try
             {
-                KeyCardNo = int.Parse(words[1]),
-                Name = words[2]
-            };
+                CheckOutDto model = new CheckOutDto()
+                {
+                    KeyCardNo = int.Parse(words[1]),
+                    Name = words[2]
+                };
 
-            var room = bookingService.CheckOut(model);
-            if (string.IsNullOrWhiteSpace(room))
-            {
-                string guestName = bookingService.GetGuestByKeyCard(model.KeyCardNo);
-                return $"Only {guestName} can checkout with keycard number {model.KeyCardNo}.";
+                var room = bookingService.CheckOut(model);
+                if (string.IsNullOrWhiteSpace(room))
+                {
+                    string guestName = bookingService.GetGuestByKeyCard(model.KeyCardNo);
+                    return $"Only {guestName} can checkout with keycard number {model.KeyCardNo}.";
+                }
+
+                var updateResult = roomService.UpdateStatusRoom(room, BookingStatus.CheckOut);
+                if (updateResult)
+                {
+                    return $"Room {room} is checkout.";
+                }
+
+                return "Something wrong";
             }
-
-            var updateResult = roomService.UpdateStatusRoom(room, BookingStatus.CheckOut);
-            if (updateResult)
+            catch(Exception ex)
             {
-                return $"Room {room} is checkout.";
+                return "Something wrong";
             }
-
-            return "Something wrong";
         }
 
         private string CheckoutGuestByFloor(string[] words)
         {
-            return "";
+            try
+            {
+                int floor = int.Parse(words[1]);
+                var roomIdList = roomService.GetRoomsByFloor(floor, BookingStatus.CheckIn);
+                if (roomIdList == null) return "No rooms has guest.";
+
+                bool isSuccess = bookingService.CheckOutByRoomIdList(roomIdList);
+                if (!isSuccess) return "Something wrong";
+
+                foreach (var room in roomIdList)
+                {
+                    var updateResult = roomService.UpdateStatusRoom(room, BookingStatus.CheckOut);
+                    if (!updateResult) return "Something wrong";
+                }
+
+                return $"Room {string.Join(", ", roomIdList)} are checkout.";
+            }
+            catch(Exception ex)
+            {
+                return "Something wrong";
+            }
         }
 
         private string ListAvailableRooms()
@@ -205,12 +263,7 @@ namespace HotelManagementSystemForPeakInterview
                 var rooms = roomService.GetAvaliableRooms();
                 if (rooms != null && rooms.Count > 0)
                 {
-                    string result = "";
-                    foreach (var room in rooms)
-                    {
-                        result += room + " ";
-                    }
-                    return result;
+                    return string.Join(", ", rooms);
                 }
 
                 return "Something wrong";
@@ -228,12 +281,7 @@ namespace HotelManagementSystemForPeakInterview
                 var guests = bookingService.GetAllGuests();
                 if (guests != null && guests.Count > 0)
                 {
-                    string result = "";
-                    foreach (var guest in guests)
-                    {
-                        result += guest + " ";
-                    }
-                    return result;
+                    return string.Join(", ", guests);
                 }
 
                 return "Something wrong";
@@ -271,7 +319,23 @@ namespace HotelManagementSystemForPeakInterview
 
         private string ListGuestByAge(string[] words)
         {
-            return "";
+            try
+            {
+                string operation = words[1];
+                int age = int.Parse(words[2]);
+
+                var guests = bookingService.GetGuestsByAge(operation, age);
+                if (guests != null && guests.Count > 0)
+                {
+                    return string.Join(", ", guests);
+                }
+
+                return "Something wrong";
+            }
+            catch (Exception)
+            {
+                return "Something wrong";
+            }
         }
 
         private string ListGuestByFloor(string[] words)
@@ -286,12 +350,7 @@ namespace HotelManagementSystemForPeakInterview
                 var guests = bookingService.GetGuestsByRoomIdList(roomIdList);
                 if (guests != null && guests.Count > 0)
                 {
-                    string result = "";
-                    foreach (var guest in guests)
-                    {
-                        result += guest + " ";
-                    }
-                    return result;
+                    return string.Join(", ", guests);
                 }
 
                 return "Something wrong";

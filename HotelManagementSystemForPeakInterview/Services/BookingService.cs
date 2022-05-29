@@ -47,9 +47,17 @@ namespace HotelManagementSystemForPeakInterview.Services
             return KeyCards[AvaliableKayCardIndex].Number;
         }
 
-        public List<CheckInResultDto> CheckInByFloor(CheckInDto model, int floor)
+        public List<int> CheckInByRoomIdList(CheckInDto model, List<string> rooms)
         {
-            throw new NotImplementedException();
+            List<int> KeyCards = new List<int>();
+            foreach(var room in rooms)
+            {
+                model.Room = room;
+                var KeyCard = CheckIn(model);
+                KeyCards.Add(KeyCard);
+            }
+
+            return KeyCards;
         }
 
         public string CheckOut(CheckOutDto model)
@@ -58,14 +66,31 @@ namespace HotelManagementSystemForPeakInterview.Services
             if (index == -1) return string.Empty;
 
             Bookings[index].Status = (int)BookingStatus.CheckOut;
-            KeyCards[model.KeyCardNo - 1].IsActive = false;
+            int keyCardIndex = Bookings[index].KeyCardNo - 1;
+            KeyCards[keyCardIndex].IsActive = false;
 
             return Bookings[index].RoomNumber;
         }
 
-        public List<string> CheckOutByFloor(int floor)
+        public bool CheckOutByRoomIdList(List<string> rooms)
         {
-            throw new NotImplementedException();
+            try
+            {
+                foreach (var room in rooms)
+                {
+                    var index = Bookings.FindIndex(x => x.RoomNumber == room && x.Status == (int)BookingStatus.CheckIn);
+                    if (index == -1) return false;
+
+                    Bookings[index].Status = (int)BookingStatus.CheckOut;
+                    int keyCardIndex = Bookings[index].KeyCardNo - 1;
+                    KeyCards[keyCardIndex].IsActive = false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public List<string> GetAllGuests()
@@ -91,7 +116,28 @@ namespace HotelManagementSystemForPeakInterview.Services
 
         public List<string> GetGuestsByAge(string operation, int age)
         {
-            throw new NotImplementedException();
+            var bookings = Bookings.Where(x => x.Status == (int)BookingStatus.CheckIn);
+
+            switch (operation)
+            {
+                case "<":
+                    bookings = bookings.Where(x => x.GuestAge < age);
+                    break;
+                case ">":
+                    bookings = bookings.Where(x => x.GuestAge > age);
+                    break;
+                case "=":
+                    bookings = bookings.Where(x => x.GuestAge == age);
+                    break;
+                case "<=":
+                    bookings = bookings.Where(x => x.GuestAge <= age);
+                    break;
+                case ">=":
+                    bookings = bookings.Where(x => x.GuestAge >= age);
+                    break;
+            }
+
+            return bookings.Select(x => x.GuestName).Distinct().ToList();
         }
 
         public List<string> GetGuestsByRoomIdList(List<string> rooms)
