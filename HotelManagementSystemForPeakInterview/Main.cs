@@ -16,9 +16,9 @@ namespace HotelManagementSystemForPeakInterview
         private List<Room> Rooms;
         private List<KeyCard> KeyCards;
 
-        private IBookingService bookingService;
-        private IRoomService roomService;
-        private IKeyCardService keyCardService;
+        private readonly IBookingService bookingService;
+        private readonly IRoomService roomService;
+        private readonly IKeyCardService keyCardService;
 
         public Main()
         {

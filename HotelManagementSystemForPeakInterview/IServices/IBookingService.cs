@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HotelManagementSystemForPeakInterview.IServices
 {
-    internal interface IBookingService
+    public interface IBookingService
     {
         int CheckIn(CheckInDto model);
         List<int> CheckInByRoomIdList(CheckInDto model, List<string> rooms);

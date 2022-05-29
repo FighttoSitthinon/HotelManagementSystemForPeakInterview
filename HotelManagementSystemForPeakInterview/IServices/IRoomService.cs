@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HotelManagementSystemForPeakInterview.IServices
 {
-    internal interface IRoomService
+    public interface IRoomService
     {
         bool CreateRooms(int floorTotal, int roomPerFloor);
         List<string> GetAvaliableRooms();

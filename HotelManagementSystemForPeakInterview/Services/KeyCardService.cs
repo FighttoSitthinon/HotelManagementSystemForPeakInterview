@@ -1,10 +1,5 @@
 ﻿using HotelManagementSystemForPeakInterview.IServices;
-using HotelManagementSystemForPeakInterview.Models.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HotelManagementSystemForPeakInterview.Models;
 
 namespace HotelManagementSystemForPeakInterview.Services
 {

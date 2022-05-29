@@ -13,6 +13,12 @@ namespace HotelManagementSystemForPeakInterview.Models.Dto
                 
         }
 
+        public CheckOutDto(int keyCardNo, string name)
+        {
+            KeyCardNo = keyCardNo;
+            Name = name;
+        }
+
         public int KeyCardNo { get; set; }
         public string Name { get; set; }
     }

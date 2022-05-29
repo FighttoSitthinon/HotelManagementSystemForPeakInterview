@@ -8,6 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\Input.txt" />
+    <None Remove="TestData\Output.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\Input.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\Output.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
@@ -18,6 +32,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HotelManagementSystemForPeakInterview\HotelManagementSystemForPeakInterview.csproj" />
   </ItemGroup>
 
 </Project>
