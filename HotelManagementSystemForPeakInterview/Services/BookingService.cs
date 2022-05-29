@@ -1,50 +1,41 @@
 ﻿using HotelManagementSystemForPeakInterview.IServices;
 using HotelManagementSystemForPeakInterview.Models;
 using HotelManagementSystemForPeakInterview.Models.Dto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HotelManagementSystemForPeakInterview.Services
 {
     public class BookingService : IBookingService
     {
         private List<Booking> Bookings;
-        private List<KeyCard> KeyCards;
+        private readonly IKeyCardService keyCardService;
 
-        public BookingService(List<Booking> bookings, List<KeyCard> keyCards)
+        public BookingService(List<Booking> bookings, IKeyCardService keyCardService)
         {
             Bookings = bookings;
-            KeyCards = keyCards;
+            this.keyCardService = keyCardService;
         }
 
         public int CheckIn(CheckInDto model)
         {
             int lastCount = Bookings.Count;
 
-            int AvaliableKayCardIndex = KeyCards.FindIndex(x => !x.IsActive);
-            if (AvaliableKayCardIndex == -1)
-            {
-                int keyCardCount = KeyCards.Count + 1;
-                KeyCards.Add(new KeyCard(keyCardCount, false));
-                AvaliableKayCardIndex = keyCardCount - 1;
-            }
+            var keyCard = keyCardService.GetAvaliableKayCard();
 
-            Bookings.Add(new Booking()
+            var newBooking = new Booking()
             {
                 Id = lastCount + 1,
                 Status = (int)BookingStatus.CheckIn,
                 RoomNumber = model.Room,
                 GuestName = model.Name,
                 GuestAge = model.Age,
-                KeyCardNo = KeyCards[AvaliableKayCardIndex].Number,
-            });
+                KeyCardNo = keyCard.Number,
+            };
 
-            KeyCards[AvaliableKayCardIndex].IsActive = true;
+            Bookings.Add(newBooking);
 
-            return KeyCards[AvaliableKayCardIndex].Number;
+            keyCardService.SetKeyCardStatus(newBooking.KeyCardNo, true);
+
+            return newBooking.KeyCardNo;
         }
 
         public List<int> CheckInByRoomIdList(CheckInDto model, List<string> rooms)
@@ -66,8 +57,7 @@ namespace HotelManagementSystemForPeakInterview.Services
             if (index == -1) return string.Empty;
 
             Bookings[index].Status = (int)BookingStatus.CheckOut;
-            int keyCardIndex = Bookings[index].KeyCardNo - 1;
-            KeyCards[keyCardIndex].IsActive = false;
+            keyCardService.SetKeyCardStatus(Bookings[index].KeyCardNo, false);
 
             return Bookings[index].RoomNumber;
         }
@@ -82,8 +72,7 @@ namespace HotelManagementSystemForPeakInterview.Services
                     if (index == -1) return false;
 
                     Bookings[index].Status = (int)BookingStatus.CheckOut;
-                    int keyCardIndex = Bookings[index].KeyCardNo - 1;
-                    KeyCards[keyCardIndex].IsActive = false;
+                    keyCardService.SetKeyCardStatus(Bookings[index].KeyCardNo, false);
                 }
                 return true;
             }

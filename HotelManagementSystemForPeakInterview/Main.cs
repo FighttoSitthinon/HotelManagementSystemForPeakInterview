@@ -18,13 +18,15 @@ namespace HotelManagementSystemForPeakInterview
 
         private IBookingService bookingService;
         private IRoomService roomService;
+        private IKeyCardService keyCardService;
 
         public Main()
         {
             Bookings = new List<Booking>();
             Rooms = new List<Room>();
             KeyCards = new List<KeyCard>();
-            bookingService = new BookingService(Bookings, KeyCards);
+            keyCardService = new KeyCardService(KeyCards);
+            bookingService = new BookingService(Bookings, keyCardService);
             roomService = new RoomService(Rooms);
         }
 
@@ -41,29 +43,17 @@ namespace HotelManagementSystemForPeakInterview
                 // Use a tab to indent each line of the file.
                 Console.WriteLine("\t" + result);
             }
-
-            //var result = ExtractString("create_hotel 2 3");
-            //// Use a tab to indent each line of the file.
-            //Console.WriteLine("\t" + result);
-
-            //result = ExtractString("list_available_rooms");
-            //// Use a tab to indent each line of the file.
-            //Console.WriteLine("\t" + result);
-
-            //result = ExtractString("book 203 TonyStark 48");
-            //// Use a tab to indent each line of the file.
-            //Console.WriteLine("\t" + result);
         }
 
-        private string ExtractString(string line)
+        public string ExtractString(string line)
         {
             string result = "";
 
             string[] words = line.Split(" ");
 
-            string cmd = words[0];
+            string keyword = words[0];
 
-            switch (cmd)
+            switch (keyword)
             {
                 case "create_hotel":
                     result = CreateHotel(words);
