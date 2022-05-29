@@ -14,6 +14,7 @@ namespace HotelManagementSystemForPeakInterview
     {
         private List<Booking> Bookings;
         private List<Room> Rooms;
+        private List<KeyCard> KeyCards;
 
         private IBookingService bookingService;
         private IRoomService roomService;
@@ -22,7 +23,8 @@ namespace HotelManagementSystemForPeakInterview
         {
             Bookings = new List<Booking>();
             Rooms = new List<Room>();
-            bookingService = new BookingService(Bookings, Rooms);
+            KeyCards = new List<KeyCard>();
+            bookingService = new BookingService(Bookings, KeyCards);
             roomService = new RoomService(Rooms);
         }
 
@@ -33,24 +35,24 @@ namespace HotelManagementSystemForPeakInterview
             // of the array is one line of the file.
             string[] lines = File.ReadAllLines(_filePath + "/Data/input.txt");
 
-            //foreach (string line in lines)
-            //{
-            //    var result = ExtractString(line);
-            //    // Use a tab to indent each line of the file.
-            //    Console.WriteLine("\t" + line);
-            //}
+            foreach (string line in lines)
+            {
+                var result = ExtractString(line);
+                // Use a tab to indent each line of the file.
+                Console.WriteLine("\t" + result);
+            }
 
-            var result = ExtractString("create_hotel 2 3");
-            // Use a tab to indent each line of the file.
-            Console.WriteLine("\t" + result);
+            //var result = ExtractString("create_hotel 2 3");
+            //// Use a tab to indent each line of the file.
+            //Console.WriteLine("\t" + result);
 
-            result = ExtractString("list_available_rooms");
-            // Use a tab to indent each line of the file.
-            Console.WriteLine("\t" + result);
+            //result = ExtractString("list_available_rooms");
+            //// Use a tab to indent each line of the file.
+            //Console.WriteLine("\t" + result);
 
-            result = ExtractString("book 203 TonyStark 48");
-            // Use a tab to indent each line of the file.
-            Console.WriteLine("\t" + result);
+            //result = ExtractString("book 203 TonyStark 48");
+            //// Use a tab to indent each line of the file.
+            //Console.WriteLine("\t" + result);
         }
 
         private string ExtractString(string line)
@@ -138,10 +140,20 @@ namespace HotelManagementSystemForPeakInterview
                     return $"Room {model.Room} does not exist.";
                 }
 
+                if (!roomService.IsRoomAvaliable(model.Room))
+                {
+                    var GuestName = bookingService.GetGuestByRoom(model.Room);
+                    return $"Cannot book room {model.Room} for {model.Name}, The room is currently booked by {GuestName}.";
+                }
+
                 var KeyCardNo = bookingService.CheckIn(model);
                 if (KeyCardNo != -1)
                 {
-                    return $"Room {model.Room} is booked by {model.Name} with keycard number {KeyCardNo}.";
+                    var updateResult = roomService.UpdateStatusRoom(model.Room, BookingStatus.CheckIn);
+                    if (updateResult)
+                    {
+                        return $"Room {model.Room} is booked by {model.Name} with keycard number {KeyCardNo}.";
+                    }
                 }
 
                 return "Something wrong";
@@ -154,7 +166,7 @@ namespace HotelManagementSystemForPeakInterview
 
         private string BookingByFloor(string[] words)
         {
-            throw new NotImplementedException();
+            return "";
         }
 
         private string Checkout(string[] words)
@@ -166,7 +178,14 @@ namespace HotelManagementSystemForPeakInterview
             };
 
             var room = bookingService.CheckOut(model);
-            if (!string.IsNullOrWhiteSpace(room))
+            if (string.IsNullOrWhiteSpace(room))
+            {
+                string guestName = bookingService.GetGuestByKeyCard(model.KeyCardNo);
+                return $"Only {guestName} can checkout with keycard number {model.KeyCardNo}.";
+            }
+
+            var updateResult = roomService.UpdateStatusRoom(room, BookingStatus.CheckOut);
+            if (updateResult)
             {
                 return $"Room {room} is checkout.";
             }
@@ -176,7 +195,7 @@ namespace HotelManagementSystemForPeakInterview
 
         private string CheckoutGuestByFloor(string[] words)
         {
-            throw new NotImplementedException();
+            return "";
         }
 
         private string ListAvailableRooms()
@@ -252,12 +271,35 @@ namespace HotelManagementSystemForPeakInterview
 
         private string ListGuestByAge(string[] words)
         {
-            throw new NotImplementedException();
+            return "";
         }
 
         private string ListGuestByFloor(string[] words)
         {
-            throw new NotImplementedException();
+            try
+            {
+                int floor = int.Parse(words[1]);
+
+                var roomIdList = roomService.GetRoomsByFloor(floor);
+                if (roomIdList == null || roomIdList.Count == 0) return "Floor or room doesn't exist.";
+
+                var guests = bookingService.GetGuestsByRoomIdList(roomIdList);
+                if (guests != null && guests.Count > 0)
+                {
+                    string result = "";
+                    foreach (var guest in guests)
+                    {
+                        result += guest + " ";
+                    }
+                    return result;
+                }
+
+                return "Something wrong";
+            }
+            catch (Exception)
+            {
+                return "Something wrong";
+            }
         }
     }
 }

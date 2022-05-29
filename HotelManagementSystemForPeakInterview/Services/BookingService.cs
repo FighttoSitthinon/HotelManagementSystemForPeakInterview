@@ -12,24 +12,25 @@ namespace HotelManagementSystemForPeakInterview.Services
     public class BookingService : IBookingService
     {
         private List<Booking> Bookings;
-        private List<Room> Rooms;
-        private int keyCardCount;
+        private List<KeyCard> KeyCards;
 
-        public BookingService(List<Booking> bookings, List<Room> rooms)
+        public BookingService(List<Booking> bookings, List<KeyCard> keyCards)
         {
             Bookings = bookings;
-            Rooms = rooms;
-            keyCardCount = 0;
+            KeyCards = keyCards;
         }
 
         public int CheckIn(CheckInDto model)
         {
-            var isRoomAlreadyBook = !Bookings.Where(x => x.RoomNumber == model.Room && x.Status == (int)BookingStatus.CheckIn).Any();
-            if (isRoomAlreadyBook) return -1;
-
             int lastCount = Bookings.Count;
 
-            keyCardCount++;
+            int AvaliableKayCardIndex = KeyCards.FindIndex(x => !x.IsActive);
+            if (AvaliableKayCardIndex == -1)
+            {
+                int keyCardCount = KeyCards.Count + 1;
+                KeyCards.Add(new KeyCard(keyCardCount, false));
+                AvaliableKayCardIndex = keyCardCount - 1;
+            }
 
             Bookings.Add(new Booking()
             {
@@ -38,10 +39,12 @@ namespace HotelManagementSystemForPeakInterview.Services
                 RoomNumber = model.Room,
                 GuestName = model.Name,
                 GuestAge = model.Age,
-                KeyCardNo = keyCardCount,
+                KeyCardNo = KeyCards[AvaliableKayCardIndex].Number,
             });
 
-            return keyCardCount;
+            KeyCards[AvaliableKayCardIndex].IsActive = true;
+
+            return KeyCards[AvaliableKayCardIndex].Number;
         }
 
         public List<CheckInResultDto> CheckInByFloor(CheckInDto model, int floor)
@@ -55,6 +58,7 @@ namespace HotelManagementSystemForPeakInterview.Services
             if (index == -1) return string.Empty;
 
             Bookings[index].Status = (int)BookingStatus.CheckOut;
+            KeyCards[model.KeyCardNo - 1].IsActive = false;
 
             return Bookings[index].RoomNumber;
         }
@@ -66,7 +70,15 @@ namespace HotelManagementSystemForPeakInterview.Services
 
         public List<string> GetAllGuests()
         {
-            return Bookings.Where(g => g.Status == (int)BookingStatus.CheckIn).Select(g => g.GuestName).ToList();
+            return Bookings.Where(g => g.Status == (int)BookingStatus.CheckIn).Select(g => g.GuestName).Distinct().ToList();
+        }
+
+        public string GetGuestByKeyCard(int KeyCardNo)
+        {
+            var book = Bookings.Where(x => x.KeyCardNo == KeyCardNo && x.Status == (int)BookingStatus.CheckIn).FirstOrDefault();
+            if (book == null) return String.Empty;
+
+            return book.GuestName;
         }
 
         public string GetGuestByRoom(string room)
@@ -80,6 +92,11 @@ namespace HotelManagementSystemForPeakInterview.Services
         public List<string> GetGuestsByAge(string operation, int age)
         {
             throw new NotImplementedException();
+        }
+
+        public List<string> GetGuestsByRoomIdList(List<string> rooms)
+        {
+            return Bookings.Where(x => rooms.Contains(x.RoomNumber) && x.Status == (int)BookingStatus.CheckIn).Select(x => x.GuestName).Distinct().ToList();
         }
     }
 }

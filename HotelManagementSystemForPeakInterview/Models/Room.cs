@@ -10,5 +10,6 @@ namespace HotelManagementSystemForPeakInterview.Models
     {
         public string RoomNumber { get; set; }
         public int Floor { get; set; }
+        public int Status { get; set; }
     }
 }

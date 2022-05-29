@@ -14,7 +14,9 @@ namespace HotelManagementSystemForPeakInterview.IServices
         string CheckOut(CheckOutDto model);
         List<string> CheckOutByFloor(int floor);
         string GetGuestByRoom(string room);
+        string GetGuestByKeyCard(int KeyCardNo);
         List<string> GetAllGuests();
         List<string> GetGuestsByAge(string operation, int age);
+        List<string> GetGuestsByRoomIdList(List<string> rooms);
     }
 }
